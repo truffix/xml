@@ -1,5 +1,22 @@
 import exct_xml
+import xml_read
+import datetime
 
-base_dir = 'C:\\Users\TRUF\PycharmProjects\pack'
+now1 = datetime.datetime.now()
 
+base_dir = r'C:\Users\User\PycharmProjects\xml\pack'
+exct_dir = r'C:\Users\User\PycharmProjects\xml\pack\exct'
 exct_xml.exct_xml(base_dir)
+#list_rar = exct_xml.exct_xml(base_dir)
+#print (list_rar)
+
+
+
+df = xml_read.read()
+#df.insert(loc=0, column='Имя zip', value=list_rar)\
+df.to_csv(r'C:\Users\User\PycharmProjects\xml\out\out.csv',  encoding='utf-16')
+print (df)
+
+now2 = datetime.datetime.now()
+now3 = now2 - now1
+print(now3)
