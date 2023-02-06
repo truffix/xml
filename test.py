@@ -39,24 +39,34 @@ def read():
 
                 BS_data = BeautifulSoup(data, "xml")  # собираем кадастровые номера
 
-                b_unique = BS_data.find('holders_related_lands')
-                b_unique = b_unique.text
+                b_unique = BS_data.find_all('right_type')
+#                b_unique = b_unique.find('value')
+                b_unique1 = []
+                for i in range(len(b_unique)):
+                    b_unique2 = b_unique[i].get_text()
+                    result = b_unique2[0]
+                    for letter in b_unique2[1:]:
+                        if letter.isupper():
+                            result += f' {letter}'
+                        else:
+                            result += letter
+                    b_unique2 = re.sub(r'[^\w\s]+|[\d]+', r'', b_unique2).strip()
+                    b_unique1.append(b_unique2)
 
-                result = b_unique[0]
-                for letter in b_unique[1:]:
-                    if letter.isupper():
-                       result += f' {letter}'
-                    else:
-                       result += letter
+#                b_unique = b_unique.replace("<", "")
+#                b_unique = b_unique.find_all('surname')
+#                b_unique = b_unique.text
+#                value = b_unique[1].getText()
 
 
 
-                list_mail_address.append(result)
+
+                list_cad_numb.append(b_unique1)
         except:
             b_unique = " "
-            list_mail_address.append(b_unique)
+            list_cad_numb.append(b_unique)
 
-    print(len(list_mail_address))
+    print(list_cad_numb)
 
 read()
 
