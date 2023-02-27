@@ -33,7 +33,7 @@ class App(customtkinter.CTk):
         self.grid_rowconfigure(7, weight=1)
 
 
-        # self.iconbitmap(r'9957d6a37c0ccdd4085cf7a739e7ca14.ico')
+        self.iconbitmap(r'9957d6a37c0ccdd4085cf7a739e7ca14.ico')
 
 
         self.scrollable_frame = customtkinter.CTkScrollableFrame(self, height=370)
