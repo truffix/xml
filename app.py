@@ -23,7 +23,7 @@ class App(customtkinter.CTk):
     def __init__(self):
         super().__init__()
 
-        # configure window
+        # конфиг окна
         self.title("Выгрузка данных выписок")
         self.geometry(f"{700}x{400}")
         self.resizable(False, False)
@@ -32,10 +32,10 @@ class App(customtkinter.CTk):
         self.grid_columnconfigure(2, weight=1)
         self.grid_rowconfigure(7, weight=1)
 
-
+        # иконка приложения
         self.iconbitmap(r'9957d6a37c0ccdd4085cf7a739e7ca14.ico')
 
-
+        # поле событий
         self.scrollable_frame = customtkinter.CTkScrollableFrame(self, height=370)
         self.scrollable_frame.grid(row=0, column=2,rowspan=2, padx=(5, 0), pady=(5, 0), sticky="nsew")
         self.scrollable_frame.grid_columnconfigure(2, weight=1)
@@ -45,7 +45,7 @@ class App(customtkinter.CTk):
 
 
 
-        # create sidebar frame with widgets
+        # поле для кнопок
         self.sidebar_frame = customtkinter.CTkFrame(self, width=0, corner_radius=0)
         self.sidebar_frame.grid(row=0, column=0, rowspan=4, sticky="nsew")
         self.sidebar_frame.grid_rowconfigure(0, weight=1)
@@ -64,8 +64,6 @@ class App(customtkinter.CTk):
         self.radio_button_2 = customtkinter.CTkRadioButton(master=self.sidebar_frame, text="Выписки ЗУ",command=self.sidebar_button_event_oks_zy, variable=self.radio_var, value=1)
         self.radio_button_2.grid(row=2, column=0, pady=10, padx=20, sticky="n")
 
-
-
         self.checkbox_2 = customtkinter.CTkCheckBox(master=self.sidebar_frame,onvalue=1, offvalue=0, text="Удалять файлы подписи",command=self.sidebar_button_event_sig)
         self.checkbox_2.grid(row=5, column=0, pady=(20, 0), padx=20, sticky="nsew")
         print(self.checkbox_2.get())
@@ -73,7 +71,7 @@ class App(customtkinter.CTk):
         self.checkbox_3.grid(row=6, column=0, pady=20, padx=20, sticky="nsew")
         print(self.checkbox_3.get())
 
-
+    # функция кнопки "путь архивов"
     def open_input_dialog_event_arch(self):
         self.dialog = tkinter.filedialog.askdirectory()
         self.base_dir = self.dialog
@@ -94,6 +92,7 @@ class App(customtkinter.CTk):
         self.textbox.insert("0.0",str(datetime.datetime.now().strftime("%H:%M:%S"))+" - Найдено "+s_s+" zip файлов:\n")
         return self.base_dir
 
+    # функция кнопки "путь к выгрузке"
     def open_output_dialog_event_exct(self):
         self.exct = tkinter.filedialog.asksaveasfilename(filetypes=(
                     ("Excel files", "*.xlsx"),
@@ -107,7 +106,7 @@ class App(customtkinter.CTk):
 
 
 
-
+    #функция кнопки "удаление файлов эцп"
     def sidebar_button_event_sig(self):
         self.checkbox_2.get()
         print (self.checkbox_2.get())
@@ -117,6 +116,7 @@ class App(customtkinter.CTk):
             self.textbox.insert("0.0",str(datetime.datetime.now().strftime("%H:%M:%S"))+" - Опция удаления файлов подписи - Выключна\n")
         return self.checkbox_2.get()
 
+    # функция кнопки "удаление файлов пдф"
     def sidebar_button_event_pdf(self):
         self.checkbox_3.get()
         print (self.checkbox_3.get())
@@ -126,6 +126,7 @@ class App(customtkinter.CTk):
             self.textbox.insert("0.0",str(datetime.datetime.now().strftime("%H:%M:%S"))+" - Опция удаления файлов пдф - Выключна\n")
         return self.checkbox_3.get()
 
+    # функция кнопки выбора типа выписок (Выписки на ЗУ и ОКС отличаются по структуре)
     def sidebar_button_event_oks_zy(self):
         self.radio_var.get()
 
@@ -136,23 +137,24 @@ class App(customtkinter.CTk):
             self.textbox.insert("0.0",str(datetime.datetime.now().strftime("%H:%M:%S"))+" - Выбрана обработка выписок ОКС\n")
         return self.radio_var.get()
 
+    #функция для тредов, чтобы не вис интерфейс
     def start_action(self):
-
         thread = threading.Thread(target=self.engien)
         print(threading.main_thread().name)
         print(thread.name)
         thread.start()
 
 
-
+    #функция обработки выписок
     def engien (self):
         # выгрузка ОКС
-        if self.radio_var.get() == 0:
+        if self.radio_var.get() == 0: #Чекает какой вид файла выбран (ЗУ или ОКС)
             self.base_dir
             self.textbox.insert("0.0",str(datetime.datetime.now().strftime("%H:%M:%S"))+" - Выполняется...\n")
             print(unpack_all_in_dir(self.base_dir))
             self.textbox.insert("0.0", unpack_all_in_dir(self.base_dir)+"\n")
 
+            #чекает какие чек батонс выбраны
             if self.checkbox_2.get() == 1:
                 print(del_sig(self.base_dir))
                 self.textbox.insert("0.0",str(datetime.datetime.now().strftime("%H:%M:%S"))+" -"+del_sig(self.base_dir) + "\n")
@@ -160,23 +162,24 @@ class App(customtkinter.CTk):
                 print(del_pdf(self.base_dir))
                 self.textbox.insert("0.0",str(datetime.datetime.now().strftime("%H:%M:%S"))+" -"+del_pdf(self.base_dir) + "\n")
 
+            #списки для данных
             list_oks = []
             list_cadastr = []
             list_file_name = []
             list_nazn = []
             list_name = []
             list_addres = []
-            extension = ".xml"
+            extension = ".xml" #переменная для проверки вида файлов
 
 
             os.chdir(self.base_dir)
-            poi = []
+            poi = [] #список для кол-ва файлов, которые будет обрабатывать
             for item in Path('.').glob('*'):
                 file_path = os.path.abspath(str(item))
                 if file_path.endswith('.xml'):
                     poi.append(1)
 
-            d = 0
+            d = 0 #начало отсчета файлов в обработке
             for item in Path('.').glob('*'):
                 file_path = os.path.abspath(str(item))
 
@@ -193,6 +196,7 @@ class App(customtkinter.CTk):
                         BS_data = BeautifulSoup(data, "xml")
                         list_file_name.append(file_name)
 
+                        # могут быть два вида структуры xml (сооружения и здания), для каждого дерево xml отличается
                         if len(BS_data.find_all('build_record')) >= 1:
                             b_unique = BS_data.find_all('build_record')
                             for i in range(len(b_unique)):
@@ -228,7 +232,6 @@ class App(customtkinter.CTk):
                                         result += letter
                                 b_unique1.append(result)
 
-                            #                b_unique = b_unique.text
                             list_oks.append(b_unique1)
                     except:
                         b_unique = " "
@@ -295,20 +298,20 @@ class App(customtkinter.CTk):
                         b_unique = " "
                         list_addres.append(b_unique)
 
+                    #Счетчик обработки файлов для наглядности в интерфейсе
                     d = d + 1
-                    # print(file_path, "--", d, "/", sum(s))
-                    eee_poi = sum(poi)
-                    eee_poi = str(eee_poi)
-                    er=str(d)
+                    eee_poi = sum(poi) #сколько их всего
+                    eee_poi = str(eee_poi) #перевод в строку, чтобы удобнее в print завести
+                    er=str(d) #текущее кол-во обработанных файлов
                     self.textbox.insert("0.0",str(datetime.datetime.now().strftime("%H:%M:%S"))+" - "+ file_path+"--"+er+"/"+eee_poi+"\n")
 
                 df_1 = pd.DataFrame({'Имя файла': list_file_name, 'Кадастровый номер': list_cadastr, 'ОКС': list_oks,
                                      'Назначение': list_nazn, 'Наименование': list_name, 'Адрес': list_addres})
-
+                #сохраняем в xlsx
                 df_1.to_excel(self.exct+".xlsx")
 
             self.textbox.insert("0.0",str(datetime.datetime.now().strftime("%H:%M:%S"))+" - Готово!\n")
-            os.startfile(self.exct + ".xlsx")
+            os.startfile(self.exct + ".xlsx") #открываем полученный файл
 
 
         #выгрузка ЗУ
@@ -325,7 +328,7 @@ class App(customtkinter.CTk):
             if self.checkbox_3.get() == 1:
                 print(del_pdf(self.base_dir))
                 self.textbox.insert("0.0",str(datetime.datetime.now().strftime("%H:%M:%S"))+" -"+del_pdf(self.base_dir) + "\n")
-            time.sleep(2)
+
             list_cadastr = []
             list_file_name = []
             list_oks = []
