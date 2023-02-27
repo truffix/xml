@@ -33,7 +33,7 @@ class App(customtkinter.CTk):
         self.grid_rowconfigure(7, weight=1)
 
 
-        self.iconbitmap(r'9957d6a37c0ccdd4085cf7a739e7ca14.ico')
+        # self.iconbitmap(r'9957d6a37c0ccdd4085cf7a739e7ca14.ico')
 
 
         self.scrollable_frame = customtkinter.CTkScrollableFrame(self, height=370)
@@ -106,10 +106,7 @@ class App(customtkinter.CTk):
 
 
 
-    # def sidebar_button_event_acrh(self):
-    #     self.checkbox_1.get()
-    #     print (self.checkbox_1.get())
-    #     return self.checkbox_1.get()
+
 
     def sidebar_button_event_sig(self):
         self.checkbox_2.get()
@@ -192,26 +189,31 @@ class App(customtkinter.CTk):
                         file_name = os.path.basename(file_path)
                         data = file.read()
 
-                        BS_data = BeautifulSoup(data, "xml")  # собираем кадастровый номер
-
-                        b_unique = BS_data.find('build_record')
-                        b_unique = b_unique.find('object')
-                        b_unique = b_unique.find('cad_number')
-                        b_unique = b_unique.text
-                        list_cadastr.append(b_unique)
+                        # собираем кадастровый номер
+                        BS_data = BeautifulSoup(data, "xml")
                         list_file_name.append(file_name)
+
+                        if len(BS_data.find_all('build_record')) >= 1:
+                            b_unique = BS_data.find_all('build_record')
+                            for i in range(len(b_unique)):
+                                b_unique = b_unique[i].find_all('object')
+                                for i in range(len(b_unique)):
+                                    b_unique = b_unique[i].find('cad_number')
+                                    b_unique = b_unique.text
+                                    list_cadastr.append(b_unique)
+
+
+                        elif len(BS_data.find_all('construction_record')) >= 1:
+                            b_unique = BS_data.find_all('construction_record')
+                            for i in range(len(b_unique)):
+                                b_unique = b_unique[i].find_all('object')
+                                for i in range(len(b_unique)):
+                                    b_unique = b_unique[i].find('cad_number')
+                                    b_unique = b_unique.text
+                                    list_cadastr.append(b_unique)
 
                     # собираем ОКСы
                     try:
-                        if item.is_file():
-                            file = codecs.open(str(item),
-                                               "r", "utf-8")
-                            file_path = os.path.abspath(str(item))
-                            file_name = os.path.basename(file_path)
-                            data = file.read()
-
-                            BS_data = BeautifulSoup(data, "xml")
-
                             b_unique = BS_data.find('land_cad_numbers')
                             b_unique = b_unique.find_all('cad_number')
 
@@ -234,97 +236,65 @@ class App(customtkinter.CTk):
 
                     # собираем Назначение
                     try:
-                        if item.is_file():
-                            file = codecs.open(str(item),
-                                               "r", "utf-8")
-                            file_path = os.path.abspath(str(item))
-                            file_name = os.path.basename(file_path)
-                            data = file.read()
-
-                            BS_data = BeautifulSoup(data, "xml")
-
-                            b_unique = BS_data.find('build_record')
-                            b_unique = b_unique.find('params')
-                            b_unique = b_unique.find_all('value')
-
-                            b_unique1 = []
+                        if len(BS_data.find_all('construction_record')) >= 1:
+                            b_unique = BS_data.find('purpose')
+                            b_unique = b_unique.text
+                            list_nazn.append(b_unique)
+                        elif len(BS_data.find_all('build_record')) >= 1:
+                            b_unique = BS_data.find_all('build_record')
                             for i in range(len(b_unique)):
-                                b_unique2 = b_unique[i].get_text()
-                                result = b_unique2[0]
-                                for letter in b_unique2[1:]:
-                                    if letter.isupper():
-                                        result += f' {letter}'
-                                    else:
-                                        result += letter
-                                b_unique1.append(result)
+                                b_unique = b_unique[i].find_all('params')
+                                for i in range(len(b_unique)):
+                                    b_unique = b_unique[i].find('value')
+                                    b_unique = b_unique.text
+                                    list_nazn.append(b_unique)
 
-                            list_nazn.append(b_unique1)
                     except:
                         b_unique = " "
                         list_nazn.append(b_unique)
 
                     # собираем Наименование
                     try:
-                        if item.is_file():
-                            file = codecs.open(str(item),
-                                               "r", "utf-8")
-                            file_path = os.path.abspath(str(item))
-                            file_name = os.path.basename(file_path)
-                            data = file.read()
+                        b_unique = BS_data.find('params')
+                        b_unique = b_unique.find_all('name')
 
-                            BS_data = BeautifulSoup(data, "xml")  # собираем кадастровые номера
+                        b_unique1 = []
+                        for i in range(len(b_unique)):
+                            b_unique2 = b_unique[i].get_text()
+                            result = b_unique2[0]
+                            for letter in b_unique2[1:]:
+                                if letter.isupper():
+                                    result += f' {letter}'
+                                else:
+                                    result += letter
+                            b_unique1.append(result)
 
-                            b_unique = BS_data.find('build_record')
-                            b_unique = b_unique.find('params')
-                            b_unique = b_unique.find_all('name')
-
-                            b_unique1 = []
-                            for i in range(len(b_unique)):
-                                b_unique2 = b_unique[i].get_text()
-                                result = b_unique2[0]
-                                for letter in b_unique2[1:]:
-                                    if letter.isupper():
-                                        result += f' {letter}'
-                                    else:
-                                        result += letter
-                                b_unique1.append(result)
-
-                            list_name.append(b_unique1)
+                        list_name.append(b_unique1)
                     except:
                         b_unique = " "
                         list_name.append(b_unique)
 
                     # собираем Адрес
                     try:
-                        if item.is_file():
-                            file = codecs.open(str(item),
-                                               "r", "utf-8")
-                            file_path = os.path.abspath(str(item))
-                            file_name = os.path.basename(file_path)
-                            data = file.read()
+                        b_unique = BS_data.find('address_location')
+                        b_unique = b_unique.find_all('readable_address')
 
-                            BS_data = BeautifulSoup(data, "xml")  # собираем кадастровые номера
+                        b_unique1 = []
+                        for i in range(len(b_unique)):
+                            b_unique2 = b_unique[i].get_text()
+                            result = b_unique2[0]
+                            for letter in b_unique2[1:]:
+                                if letter.isupper():
+                                    result += f' {letter}'
+                                else:
+                                    result += letter
+                            b_unique1.append(result)
 
-                            b_unique = BS_data.find('build_record')
-                            b_unique = b_unique.find('address_location')
-                            b_unique = b_unique.find_all('readable_address')
-
-                            b_unique1 = []
-                            for i in range(len(b_unique)):
-                                b_unique2 = b_unique[i].get_text()
-                                result = b_unique2[0]
-                                for letter in b_unique2[1:]:
-                                    if letter.isupper():
-                                        result += f' {letter}'
-                                    else:
-                                        result += letter
-                                b_unique1.append(result)
-
-                            list_addres.append(b_unique1)
+                        list_addres.append(b_unique1)
                     except:
                         b_unique = " "
                         list_addres.append(b_unique)
-                    path = Path(self.base_dir)
+
                     d = d + 1
                     # print(file_path, "--", d, "/", sum(s))
                     eee_poi = sum(poi)
@@ -338,7 +308,7 @@ class App(customtkinter.CTk):
                 df_1.to_excel(self.exct+".xlsx")
 
             self.textbox.insert("0.0",str(datetime.datetime.now().strftime("%H:%M:%S"))+" - Готово!\n")
-
+            os.startfile(self.exct + ".xlsx")
 
 
         #выгрузка ЗУ
@@ -347,8 +317,7 @@ class App(customtkinter.CTk):
             self.textbox.insert("0.0",str(datetime.datetime.now().strftime("%H:%M:%S"))+" - Выполняется...\n")
             print(unpack_all_in_dir(self.base_dir))
             self.textbox.insert("0.0", unpack_all_in_dir(self.base_dir) + "\n")
-            #        if self.checkbox_1.get() == 1:
-            #           print(del_sig(self.base_dir))
+
 
             if self.checkbox_2.get() == 1:
                 print(del_sig(self.base_dir))
@@ -598,7 +567,8 @@ class App(customtkinter.CTk):
                 df_1.to_excel(self.exct + ".xlsx")
 
             self.textbox.insert("0.0",str(datetime.datetime.now().strftime("%H:%M:%S"))+" - Готово!\n")
-            os.startfile(self.exct+".xlsx")
+
+        os.startfile(self.exct+".xlsx")
 
 
 if __name__ == "__main__":
